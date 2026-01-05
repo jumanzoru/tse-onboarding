@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getTask, type Task } from "src/api/tasks";
+import { TaskForm, UserTag } from "src/components";
 import styles from "src/pages/TaskDetail.module.css";
 
 export function TaskDetail() {
   const { id } = useParams<{ id: string }>();
 
   const [task, setTask] = useState<Task | null>(null);
-
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const dateFormatter = new Intl.DateTimeFormat("en-US", {
     dateStyle: "full",
@@ -46,12 +47,7 @@ export function TaskDetail() {
   const createdText = useMemo(() => {
     if (!task) return "";
     return dateFormatter.format(task.dateCreated);
-  }, [task]);
-
-  const assigneeText = useMemo(() => {
-    const assigneeId = task?.assignee?._id;
-    return assigneeId ?? "Unassigned";
-  }, [task?.assignee]);
+  }, [task, dateFormatter]);
 
   if (notFound) {
     return (
@@ -59,7 +55,6 @@ export function TaskDetail() {
         <Link className={styles.homeLink} to="/">
           Home
         </Link>
-        {/*  */}
         <p className={styles.notFound}>Task not found.</p>
       </div>
     );
@@ -76,6 +71,27 @@ export function TaskDetail() {
     );
   }
 
+  // ✅ NEW: edit mode view
+  if (isEditing) {
+    return (
+      <div className={styles.container}>
+        <Link className={styles.homeLink} to="/">
+          Home
+        </Link>
+
+        <TaskForm
+          mode="edit"
+          task={task}
+          onSubmit={(updatedTask) => {
+            setTask(updatedTask);
+            setIsEditing(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ✅ existing info view, with UserTag + working Edit button
   return (
     <div className={styles.container}>
       <Link className={styles.homeLink} to="/">
@@ -85,12 +101,11 @@ export function TaskDetail() {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>{task.title}</h1>
 
-        <button className={styles.editButton} type="button" onClick={() => {}}>
+        <button className={styles.editButton} type="button" onClick={() => setIsEditing(true)}>
           Edit task
         </button>
       </div>
 
-      {/* Description: conditionally render */}
       {task.description ? (
         <p className={styles.description}>{task.description}</p>
       ) : (
@@ -100,7 +115,7 @@ export function TaskDetail() {
       <div className={styles.metaGrid}>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Assignee</span>
-          <span className={styles.metaValue}>{assigneeText}</span>
+          <UserTag user={task.assignee} />
         </div>
 
         <div className={styles.metaItem}>

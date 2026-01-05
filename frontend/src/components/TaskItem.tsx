@@ -2,7 +2,7 @@ import { Dialog } from "@tritonse/tse-constellation";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { updateTask } from "src/api/tasks";
-import { CheckButton } from "src/components";
+import { CheckButton, UserTag } from "src/components";
 import styles from "src/components/TaskItem.module.css";
 
 import type { Task, UpdateTaskRequest } from "src/api/tasks";
@@ -20,8 +20,13 @@ export function TaskItem({ task: initialTask }: TaskItemProps) {
     setLoading(true);
 
     const payload: UpdateTaskRequest = {
-      ...task,
+      _id: task._id,
+      title: task.title,
+      description: task.description,
       isChecked: !task.isChecked,
+      dateCreated: task.dateCreated,
+      // UpdateTaskRequest expects an ID string, not a User object
+      assignee: task.assignee?._id,
     };
 
     const result = await updateTask(payload);
@@ -54,6 +59,9 @@ export function TaskItem({ task: initialTask }: TaskItemProps) {
         </Link>
         {task.description && <span className={styles.description}>{task.description}</span>}
       </div>
+
+      {/* UserTag on the right */}
+      <UserTag user={task.assignee} className={styles.userTag} />
 
       <Dialog isOpen={error !== ""} onClose={() => setError("")}>
         <p className={styles.errorModalText}>{error}</p>

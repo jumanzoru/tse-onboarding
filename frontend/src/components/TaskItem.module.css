@@ -45,3 +45,11 @@
 .titleLink:hover {
   text-decoration: underline;
 }
+
+.assigneeRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  column-gap: 0.75rem;
+  width: 100%;
+}

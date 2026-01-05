@@ -16,3 +16,9 @@
 .errorModalText {
   color: var(--color-blue);
 }
+
+.userTag {
+  width: 12rem;
+  display: flex;
+  justify-content: flex-end;
+}
